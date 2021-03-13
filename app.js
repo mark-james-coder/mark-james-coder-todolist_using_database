@@ -12,7 +12,7 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(express.static("public"));
 
-mongoose.connect("mongodb://localhost:27017/todolistDB", {
+mongoose.connect("mongodb+srv://admin-mark:test123@cluster0.pbp21.mongodb.net/todolistDB", {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
@@ -107,41 +107,49 @@ app.post("/delete", (req, res) => {
       }
     })
   } else {
-    List.findOneAndUpdate({name: listName}, {$pull: {items: {_id: checkedItemId}}}, function(err, foundList) {
+    List.findOneAndUpdate({
+      name: listName
+    }, {
+      $pull: {
+        items: {
+          _id: checkedItemId
+        }
+      }
+    }, function(err, foundList) {
       if (!err) {
         res.redirect("/" + listName);
       }
-    }
-    )};
-  });
+    })
+  };
+});
 
 
 app.get("/:customListName", function(req, res) {
-const customListName = _.capitalize(req.params.customListName);
+  const customListName = _.capitalize(req.params.customListName);
 
-List.findOne({
-  name: customListName
-}, function(err, foundList) {
-  if (!err) {
-    if (!foundList) {
-      //Create a new list
-      const list = new List({
-        name: customListName,
-        items: defaultItems
-      });
+  List.findOne({
+    name: customListName
+  }, function(err, foundList) {
+    if (!err) {
+      if (!foundList) {
+        //Create a new list
+        const list = new List({
+          name: customListName,
+          items: defaultItems
+        });
 
-      list.save();
-      res.redirect("/" + customListName);
-    } else {
-      //Show an existing list
+        list.save();
+        res.redirect("/" + customListName);
+      } else {
+        //Show an existing list
 
-      res.render("list", {
-        listTitle: foundList.name,
-        newListItems: foundList.items
-      });
+        res.render("list", {
+          listTitle: foundList.name,
+          newListItems: foundList.items
+        });
+      }
     }
-  }
-});
+  });
 });
 
 app.listen(3000, function() {
